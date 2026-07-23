@@ -1,98 +1,89 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useEffect, useState } from 'react';
+import { useColorScheme } from 'react-native';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import AccessPortal from './AccessPortal';
+import LoadingScreen from './LoadingScreen';
+import MainDashboard from './MainDashboard';
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
+export default function Index() {
+  const systemColorScheme = useColorScheme();
+
+  const [isLoading, setIsLoading] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
+  const [progress, setProgress] = useState(0);
+  const [statusText, setStatusText] = useState('Syncing Physics Engine...');
+
+  useEffect(() => {
+    let progressVal = 0;
+
+    const progressInterval = setInterval(() => {
+      progressVal += Math.random() * 4 + 1.5;
+      if (progressVal >= 100) {
+        progressVal = 100;
+        clearInterval(progressInterval);
+      }
+      setProgress(Math.min(100, progressVal));
+    }, 100);
+
+    const initializeApp = async () => {
+      const minTimerPromise = new Promise((resolve) => setTimeout(resolve, 1000));
+
+      const themePromise = (async () => {
+        setStatusText('Calibrating Constants...');
+        const detectedTheme = systemColorScheme === 'dark' ? 'dark' : 'light';
+        setTheme(detectedTheme);
+        return detectedTheme;
+      })();
+
+      const sessionPromise = (async () => {
+        setStatusText('Checking Active Session...');
+        const hasSession = await checkUserSession();
+        setIsLoggedIn(hasSession);
+        return hasSession;
+      })();
+
+      await Promise.all([minTimerPromise, themePromise, sessionPromise]);
+
+      setStatusText('Lab Ready');
+      setProgress(100);
+
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 300);
+    };
+
+    initializeApp();
+
+    return () => clearInterval(progressInterval);
+  }, [systemColorScheme]);
+
+  const checkUserSession = async (): Promise<boolean> => {
+    await new Promise((resolve) => setTimeout(resolve, 800));
+    return false; // Set to `true` to bypass login if session token exists
+  };
+
+  // 1. Loading Screen
+  if (isLoading) {
+    return <LoadingScreen progress={progress} statusText={statusText} />;
   }
-  if (Device.isDevice) {
+
+  // 2. Login / Sign Up Access Portal
+  if (!isLoggedIn) {
     return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
+      <AccessPortal
+        theme={theme}
+        onThemeChange={(newTheme) => setTheme(newTheme)}
+        onLoginSuccess={() => setIsLoggedIn(true)}
+      />
     );
   }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
+
+  // 3. Main Interactive Physics Dashboard
   return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
+    <MainDashboard
+      theme={theme}
+      onLogout={() => setIsLoggedIn(false)}
+    />
   );
 }
-
-export default function HomeScreen() {
-  return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
-
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
-
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
-  },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
-  },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
-  },
-  title: {
-    textAlign: 'center',
-  },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
-  },
-});

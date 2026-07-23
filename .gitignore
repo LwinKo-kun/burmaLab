@@ -1,43 +1,83 @@
-# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
-
-# dependencies
+# ------------------------------------------------------------------------------
+# Dependencies
+# ------------------------------------------------------------------------------
 node_modules/
+.pnpm-store/
+yarn-error.log
+yarn-debug.log*
+npm-debug.log*
+lerna-debug.log*
 
-# Expo
+# ------------------------------------------------------------------------------
+# Metro / Bundler / Cache
+# ------------------------------------------------------------------------------
 .expo/
+.expo-shared/
+.metro-health-check*
+*.metro-health-check*
+metro-cache/
+.cache/
+
+# ------------------------------------------------------------------------------
+# Build / Generated Outputs
+# ------------------------------------------------------------------------------
 dist/
 web-build/
-expo-env.d.ts
+*.pfx
+*.keystore
+# Keep debug.keystore if you rely on it for shared team local debugging:
+# !android/app/debug.keystore
 
-# Native
-.kotlin/
-*.orig.*
-*.jks
-*.p8
-*.p12
-*.key
-*.mobileprovision
+# ------------------------------------------------------------------------------
+# Android
+# ------------------------------------------------------------------------------
+android/.gradle/
+android/app/build/
+android/build/
+android/captures/
+android/.idea/
+android/*.iml
+android/app/*.iml
+android/local.properties
+android/sentry.properties
 
-# Metro
-.metro-health-check*
+# ------------------------------------------------------------------------------
+# Environment / Secrets
+# ------------------------------------------------------------------------------
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
 
-# debug
-npm-debug.*
-yarn-debug.*
-yarn-error.*
-
-# macOS
+# ------------------------------------------------------------------------------
+# macOS / System files
+# ------------------------------------------------------------------------------
 .DS_Store
-*.pem
+.AppleDouble
+.LSOverride
+Thumbs.db
+*.swp
+*.swo
 
-# local env files
-.env*.local
+# ------------------------------------------------------------------------------
+# IDE / Editor Files
+# ------------------------------------------------------------------------------
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.workspace
 
-# typescript
-*.tsbuildinfo
-
-example
-
-# generated native folders
-/ios
-/android
+# ------------------------------------------------------------------------------
+# Testing & Coverage
+# ------------------------------------------------------------------------------
+coverage/
+.nyc_output/
