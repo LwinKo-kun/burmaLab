@@ -10,7 +10,8 @@ export default function Index() {
 
   const [isLoading, setIsLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
+  const [themePreference, setThemePreference] = useState<'system' | 'light' | 'dark'>('system');
+  const theme = themePreference === 'system' ? (systemColorScheme === 'dark' ? 'dark' : 'light') : themePreference;
   const [progress, setProgress] = useState(0);
   const [statusText, setStatusText] = useState('Syncing Physics Engine...');
 
@@ -29,13 +30,6 @@ export default function Index() {
     const initializeApp = async () => {
       const minTimerPromise = new Promise((resolve) => setTimeout(resolve, 1000));
 
-      const themePromise = (async () => {
-        setStatusText('Calibrating Constants...');
-        const detectedTheme = systemColorScheme === 'dark' ? 'dark' : 'light';
-        setTheme(detectedTheme);
-        return detectedTheme;
-      })();
-
       const sessionPromise = (async () => {
         setStatusText('Checking Active Session...');
         const hasSession = await checkUserSession();
@@ -43,7 +37,7 @@ export default function Index() {
         return hasSession;
       })();
 
-      await Promise.all([minTimerPromise, themePromise, sessionPromise]);
+      await Promise.all([minTimerPromise, sessionPromise]);
 
       setStatusText('Lab Ready');
       setProgress(100);
@@ -56,7 +50,7 @@ export default function Index() {
     initializeApp();
 
     return () => clearInterval(progressInterval);
-  }, [systemColorScheme]);
+  }, []);  // initialize once on mount, do not rerun when system theme changes
 
   const checkUserSession = async (): Promise<boolean> => {
     await new Promise((resolve) => setTimeout(resolve, 800));
@@ -82,6 +76,8 @@ export default function Index() {
   return (
     <MainDashboard
       theme={theme}
+      themePreference={themePreference}
+      onPreferenceChange={(p: 'system' | 'light' | 'dark') => setThemePreference(p)}
       onLogout={() => setIsLoggedIn(false)}
     />
   );

@@ -11,15 +11,13 @@ interface BottomNavProps {
 
 export default function BottomNav({ activeTab, onTabChange, isDark }: BottomNavProps) {
   return (
-    <View style={[styles.bottomNav, { backgroundColor: isDark ? '#0d1320' : '#f8fafc', borderTopColor: isDark ? '#1e293b' : '#e2e8f0' }]}>
+    <View style={[styles.bottomNav, { backgroundColor: isDark ? '#0d1320' : '#f8fafc', borderTopColor: isDark ? '#1e293b' : '#e2e8f0' }]}>      
       <TouchableOpacity style={styles.navTab} onPress={() => onTabChange('dashboard')}>
         <LayoutDashboard
           size={20}
           color={activeTab === 'dashboard' ? (isDark ? '#00daf3' : '#00838f') : (isDark ? '#64748b' : '#94a3b8')}
         />
-        <Text style={[styles.navLabel, activeTab === 'dashboard' && { color: isDark ? '#00daf3' : '#00838f', fontWeight: '700' }]}>
-          Dashboard
-        </Text>
+        <Text style={[styles.navLabel, activeTab === 'dashboard' && { color: isDark ? '#00daf3' : '#00838f', fontWeight: '700' }]}>Dashboard</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.navTab} onPress={() => onTabChange('explore')}>
@@ -27,9 +25,7 @@ export default function BottomNav({ activeTab, onTabChange, isDark }: BottomNavP
           size={20}
           color={activeTab === 'explore' ? (isDark ? '#00daf3' : '#00838f') : (isDark ? '#64748b' : '#94a3b8')}
         />
-        <Text style={[styles.navLabel, activeTab === 'explore' && { color: isDark ? '#00daf3' : '#00838f', fontWeight: '700' }]}>
-          Explore
-        </Text>
+        <Text style={[styles.navLabel, activeTab === 'explore' && { color: isDark ? '#00daf3' : '#00838f', fontWeight: '700' }]}>Explore</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.navTab} onPress={() => onTabChange('notifications')}>
@@ -37,9 +33,7 @@ export default function BottomNav({ activeTab, onTabChange, isDark }: BottomNavP
           size={20}
           color={activeTab === 'notifications' ? (isDark ? '#00daf3' : '#00838f') : (isDark ? '#64748b' : '#94a3b8')}
         />
-        <Text style={[styles.navLabel, activeTab === 'notifications' && { color: isDark ? '#00daf3' : '#00838f', fontWeight: '700' }]}>
-          Alerts
-        </Text>
+        <Text style={[styles.navLabel, activeTab === 'notifications' && { color: isDark ? '#00daf3' : '#00838f', fontWeight: '700' }]}>Alerts</Text>
       </TouchableOpacity>
     </View>
   );
@@ -47,6 +41,7 @@ export default function BottomNav({ activeTab, onTabChange, isDark }: BottomNavP
 
 const styles = StyleSheet.create({
   bottomNav: {
+    width: '100%',
     height: 60,
     flexDirection: 'row',
     borderTopWidth: 1,

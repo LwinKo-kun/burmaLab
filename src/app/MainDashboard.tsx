@@ -4,9 +4,8 @@ import {
   ChevronDown,
   FlaskConical,
   LogOut,
-  Moon,
+  Settings,
   Shield,
-  Sun,
   User as UserIcon,
   Users
 } from 'lucide-react-native';
@@ -21,9 +20,11 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import BottomNav, { ActiveTab } from './BottomNav';
+import BottomNav, { ActiveTab } from '@/components/BottomNav';
+import Header from '@/components/Header';
 import ExploreView from './ExploreView';
 import NotificationsView from './NotificationsView';
+import SettingsView from './SettingsView';
 import UserProfileView from './UserProfileView';
 
 export interface UserProfile {
@@ -35,6 +36,8 @@ export interface UserProfile {
 
 interface MainDashboardProps {
   theme?: 'dark' | 'light';
+  themePreference?: 'system' | 'light' | 'dark';
+  onPreferenceChange?: (pref: 'system' | 'light' | 'dark') => void;
   onThemeChange?: (newTheme: 'dark' | 'light') => void;
   onLogout?: () => void;
   currentUser?: UserProfile;
@@ -42,6 +45,8 @@ interface MainDashboardProps {
 
 export default function MainDashboard({
   theme = 'dark',
+  themePreference = 'system',
+  onPreferenceChange,
   onThemeChange,
   onLogout,
   currentUser = {
@@ -53,56 +58,34 @@ export default function MainDashboard({
 }: MainDashboardProps) {
   const [activeTab, setActiveTab] = useState<ActiveTab>('dashboard');
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
-  const [activeTheme, setActiveTheme] = useState<'dark' | 'light'>(theme);
+  const [isViewingSettings, setIsViewingSettings] = useState(false);
   const [isViewingProfile, setIsViewingProfile] = useState(false);
-
   const insets = useSafeAreaInsets();
-  const isDark = activeTheme === 'dark';
+  const isDark = theme === 'dark';
   const isAdmin = currentUser.role === 'admin';
 
-  const toggleTheme = () => {
-    const nextTheme = isDark ? 'light' : 'dark';
-    setActiveTheme(nextTheme);
-    if (onThemeChange) {
-      onThemeChange(nextTheme);
-    }
-  };
-
   const dynamicStyles = getStyles(isDark);
-
   return (
-    <View style={[dynamicStyles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+    <View style={[dynamicStyles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>      
       <StatusBar
         barStyle={isDark ? 'light-content' : 'dark-content'}
         backgroundColor={isDark ? '#0d1320' : '#f8fafc'}
       />
 
-      {/* ------------------ HEADER BAR ------------------ */}
-      <View style={dynamicStyles.header}>
-        <View style={styles.brandGroup}>
-          <FlaskConical size={26} color={isDark ? '#00daf3' : '#00838f'} />
-          <Text style={dynamicStyles.brandTitle}>Burma Lab</Text>
-        </View>
-
-        <View style={styles.headerRight}>
-          <TouchableOpacity style={dynamicStyles.iconButton} onPress={toggleTheme}>
-            {isDark ? <Sun size={18} color="#00daf3" /> : <Moon size={18} color="#00838f" />}
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={dynamicStyles.profileChip}
-            onPress={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-            activeOpacity={0.8}
-          >
-            <View style={dynamicStyles.avatarBadge}>
-              <Text style={dynamicStyles.avatarText}>
-                {currentUser.name.charAt(0).toUpperCase()}
-              </Text>
-            </View>
-            <ChevronDown size={14} color={isDark ? '#bac9cc' : '#64748b'} />
-          </TouchableOpacity>
-        </View>
-      </View>
+      <Header isDark={isDark}>
+        <TouchableOpacity
+          style={dynamicStyles.profileChip}
+          onPress={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+          activeOpacity={0.8}
+        >
+          <View style={dynamicStyles.avatarBadge}>
+            <Text style={dynamicStyles.avatarText}>
+              {currentUser.name.charAt(0).toUpperCase()}
+            </Text>
+          </View>
+          <ChevronDown size={14} color={isDark ? '#bac9cc' : '#64748b'} />
+        </TouchableOpacity>
+      </Header>
 
       {/* ------------------ PROFILE DROPDOWN MENU ------------------ */}
       {isProfileMenuOpen && (
@@ -124,6 +107,7 @@ export default function MainDashboard({
             onPress={() => {
               setIsProfileMenuOpen(false);
               setIsViewingProfile(true);
+              setIsViewingSettings(false);
             }}
           >
             <UserIcon size={16} color={isDark ? '#bac9cc' : '#64748b'} />
@@ -134,6 +118,20 @@ export default function MainDashboard({
             style={styles.menuItem}
             onPress={() => {
               setIsProfileMenuOpen(false);
+              setIsViewingSettings(true);
+              setIsViewingProfile(false);
+            }}
+          >
+            <Settings size={16} color={isDark ? '#bac9cc' : '#64748b'} />
+            <Text style={dynamicStyles.menuItemText}>Settings</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => {
+              setIsProfileMenuOpen(false);
+              setIsViewingProfile(false);
+              setIsViewingSettings(false);
               if (onLogout) onLogout();
             }}
           >
@@ -149,6 +147,12 @@ export default function MainDashboard({
           currentUser={currentUser}
           isDark={isDark}
           onBack={() => setIsViewingProfile(false)}
+        />
+      ) : isViewingSettings ? (
+        <SettingsView
+          preference={themePreference}
+          onPreferenceChange={onPreferenceChange}
+          onBack={() => setIsViewingSettings(false)}
         />
       ) : (
         <>
@@ -177,18 +181,13 @@ export default function MainDashboard({
             )}
 
             {activeTab === 'explore' && <ExploreView isDark={isDark} />}
-            {activeTab === 'notifications' && <NotificationsView isDark={isDark} />}
+            {activeTab === 'notifications' && (
+              <NotificationsView isDark={isDark} onClose={() => setActiveTab('dashboard')} />
+            )}
           </ScrollView>
 
           {/* Reusable Bottom Navigation Component */}
-          <BottomNav
-            activeTab={activeTab}
-            onTabChange={(tab) => {
-              setActiveTab(tab);
-              setIsViewingProfile(false);
-            }}
-            isDark={isDark}
-          />
+          <BottomNav activeTab={activeTab} onTabChange={setActiveTab} isDark={isDark} />
         </>
       )}
     </View>

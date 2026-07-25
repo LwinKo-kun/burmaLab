@@ -1,4 +1,4 @@
-import { Eye, EyeOff, FlaskConical, Moon, Sun } from 'lucide-react-native';
+import { Eye, EyeOff, FlaskConical } from 'lucide-react-native';
 import { useState } from 'react';
 import {
   ActivityIndicator,
@@ -24,9 +24,7 @@ interface AccessPortalProps {
 
 export default function AccessPortal({ onLoginSuccess, theme, onThemeChange }: AccessPortalProps) {
   const systemColorScheme = useColorScheme();
-  const [overrideTheme, setOverrideTheme] = useState<'dark' | 'light' | null>(theme || null);
-
-  const activeTheme = overrideTheme || systemColorScheme || 'dark';
+  const activeTheme = theme ?? systemColorScheme ?? 'dark';
   const isDark = activeTheme === 'dark';
 
   const [isSignUp, setIsSignUp] = useState(false);
@@ -39,13 +37,7 @@ export default function AccessPortal({ onLoginSuccess, theme, onThemeChange }: A
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  const toggleTheme = () => {
-    const nextTheme = isDark ? 'light' : 'dark';
-    setOverrideTheme(nextTheme);
-    if (onThemeChange) {
-      onThemeChange(nextTheme);
-    }
-  };
+  // Theme control moved to Settings; no local toggle here.
 
   const handleAuth = async () => {
     // Basic validation
@@ -105,18 +97,13 @@ export default function AccessPortal({ onLoginSuccess, theme, onThemeChange }: A
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* Header Bar */}
-          <View style={styles.header}>
-            <View style={styles.brandRow}>
-              <FlaskConical size={28} color={isDark ? '#00daf3' : '#00838f'} />
-              <Text style={dynamicStyles.brandTitle}>Burma Lab</Text>
-            </View>
-
-            {/* Theme Toggle Button */}
-            <TouchableOpacity style={dynamicStyles.themeToggle} onPress={toggleTheme}>
-              {isDark ? <Sun size={18} color="#00daf3" /> : <Moon size={18} color="#00838f" />}
-            </TouchableOpacity>
-          </View>
+              {/* Header Bar */}
+              <View style={styles.header}>
+                <View style={styles.brandRow}>
+                  <FlaskConical size={28} color={isDark ? '#00daf3' : '#00838f'} />
+                  <Text style={dynamicStyles.brandTitle}>Burma Lab</Text>
+                </View>
+              </View>
 
           {/* Card Panel */}
           <View style={styles.panelContainer}>

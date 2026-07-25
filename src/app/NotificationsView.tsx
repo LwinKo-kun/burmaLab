@@ -1,19 +1,20 @@
 import { Bell } from 'lucide-react-native';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text } from 'react-native';
 
 interface NotificationsViewProps {
   isDark: boolean;
+  onClose?: () => void;
 }
 
-export default function NotificationsView({ isDark }: NotificationsViewProps) {
+export default function NotificationsView({ isDark, onClose }: NotificationsViewProps) {
   return (
-    <View style={styles.container}>
+    <Pressable style={styles.container} onPress={() => onClose && onClose()}>
       <Bell size={36} color={isDark ? '#00daf3' : '#00838f'} />
       <Text style={[styles.title, { color: isDark ? '#dce2f4' : '#0f172a' }]}>System Alerts</Text>
       <Text style={[styles.subtitle, { color: isDark ? '#94a3b8' : '#64748b' }]}>
         You are all caught up! No new notifications or security alerts at this time.
       </Text>
-    </View>
+    </Pressable>
   );
 }
 
