@@ -4,13 +4,24 @@
     "slug": "burmaLab",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/expo.icon/Assets/lab_icon.png",
     "scheme": "burmalab",
     "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/expo.icon/Assets/lab_icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#208AEF"
+    },
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon/Assets/lab_icon.png",
+      "splash": {
+        "image": "./assets/expo.icon/Assets/lab_icon.png",
+        "resizeMode": "contain",
+        "backgroundColor": "#208AEF"
+      }
     },
     "android": {
+      "icon": "./assets/expo.icon/Assets/lab_icon.png",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -30,7 +41,7 @@
         "expo-splash-screen",
         {
           "backgroundColor": "#208AEF",
-          "image": "./assets/images/splash-icon.png",
+          "image": "./assets/images/icon.png",
           "imageWidth": 76
         }
       ]

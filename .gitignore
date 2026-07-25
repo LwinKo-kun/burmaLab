@@ -27,6 +27,7 @@ web-build/
 *.keystore
 # Keep debug.keystore if you rely on it for shared team local debugging:
 # !android/app/debug.keystore
+android/app/debug.keystore
 
 # ------------------------------------------------------------------------------
 # Android
