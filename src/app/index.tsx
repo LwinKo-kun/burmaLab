@@ -68,12 +68,11 @@ export default function Index() {
     return <LoadingScreen progress={progress} statusText={statusText} />;
   }
 
-  // 2. Login / Sign Up Access Portal
+  // 2. Login / Sign Up Access Portal (theme toggle props removed)
   if (!isLoggedIn) {
     return (
       <AccessPortal
         theme={theme}
-        onThemeChange={(newTheme) => setTheme(newTheme)}
         onLoginSuccess={() => setIsLoggedIn(true)}
       />
     );

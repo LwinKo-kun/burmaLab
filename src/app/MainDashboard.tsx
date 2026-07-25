@@ -1,21 +1,17 @@
 import {
   Activity,
   BarChart3,
-  Bell,
   ChevronDown,
-  Compass,
   FlaskConical,
-  LayoutDashboard,
   LogOut,
   Moon,
   Shield,
   Sun,
   User as UserIcon,
-  Users,
+  Users
 } from 'lucide-react-native';
 import { useState } from 'react';
 import {
-  SafeAreaView,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -23,8 +19,13 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-// User shape definition
+import BottomNav, { ActiveTab } from './BottomNav';
+import ExploreView from './ExploreView';
+import NotificationsView from './NotificationsView';
+import UserProfileView from './UserProfileView';
+
 export interface UserProfile {
   id: string;
   name: string;
@@ -36,7 +37,6 @@ interface MainDashboardProps {
   theme?: 'dark' | 'light';
   onThemeChange?: (newTheme: 'dark' | 'light') => void;
   onLogout?: () => void;
-  // Mock logged-in user prop (defaults to 'admin' for preview)
   currentUser?: UserProfile;
 }
 
@@ -48,13 +48,15 @@ export default function MainDashboard({
     id: 'usr_01',
     name: 'Alex Rivera',
     email: 'alex.rivera@burmalab.edu',
-    role: 'admin', // Switch to 'user' to test standard member view
+    role: 'admin',
   },
 }: MainDashboardProps) {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'explore' | 'notifications'>('dashboard');
+  const [activeTab, setActiveTab] = useState<ActiveTab>('dashboard');
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [activeTheme, setActiveTheme] = useState<'dark' | 'light'>(theme);
+  const [isViewingProfile, setIsViewingProfile] = useState(false);
 
+  const insets = useSafeAreaInsets();
   const isDark = activeTheme === 'dark';
   const isAdmin = currentUser.role === 'admin';
 
@@ -69,7 +71,7 @@ export default function MainDashboard({
   const dynamicStyles = getStyles(isDark);
 
   return (
-    <SafeAreaView style={dynamicStyles.container}>
+    <View style={[dynamicStyles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
       <StatusBar
         barStyle={isDark ? 'light-content' : 'dark-content'}
         backgroundColor={isDark ? '#0d1320' : '#f8fafc'}
@@ -83,12 +85,10 @@ export default function MainDashboard({
         </View>
 
         <View style={styles.headerRight}>
-          {/* Theme Switcher Button */}
           <TouchableOpacity style={dynamicStyles.iconButton} onPress={toggleTheme}>
             {isDark ? <Sun size={18} color="#00daf3" /> : <Moon size={18} color="#00838f" />}
           </TouchableOpacity>
 
-          {/* Profile Dropdown Trigger */}
           <TouchableOpacity
             style={dynamicStyles.profileChip}
             onPress={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
@@ -123,6 +123,7 @@ export default function MainDashboard({
             style={styles.menuItem}
             onPress={() => {
               setIsProfileMenuOpen(false);
+              setIsViewingProfile(true);
             }}
           >
             <UserIcon size={16} color={isDark ? '#bac9cc' : '#64748b'} />
@@ -142,110 +143,74 @@ export default function MainDashboard({
         </View>
       )}
 
-      {/* ------------------ DASHBOARD BODY ------------------ */}
-      <ScrollView
-        contentContainerStyle={styles.scrollBody}
-        showsVerticalScrollIndicator={false}
-        onScrollBeginDrag={() => setIsProfileMenuOpen(false)}
-      >
-        {/* Welcome Section */}
-        <View style={styles.welcomeBanner}>
-          <Text style={dynamicStyles.greeting}>
-            Hello, {currentUser.name.split(' ')[0]} 👋
-          </Text>
-          <Text style={dynamicStyles.subGreeting}>
-            {isAdmin ? 'System Operations & Control Panel' : 'Workspace & Simulation Overview'}
-          </Text>
-        </View>
-
-        {/* Dynamic View rendering based on user role */}
-        {isAdmin ? (
-          <AdminView isDark={isDark} dynamicStyles={dynamicStyles} />
-        ) : (
-          <StandardUserView isDark={isDark} dynamicStyles={dynamicStyles} />
-        )}
-      </ScrollView>
-
-      {/* ------------------ BOTTOM NAVIGATION BAR ------------------ */}
-      <View style={dynamicStyles.bottomNav}>
-        <TouchableOpacity
-          style={styles.navTab}
-          onPress={() => setActiveTab('dashboard')}
-        >
-          <LayoutDashboard
-            size={20}
-            color={activeTab === 'dashboard' ? (isDark ? '#00daf3' : '#00838f') : (isDark ? '#64748b' : '#94a3b8')}
-          />
-          <Text
-            style={[
-              dynamicStyles.navLabel,
-              activeTab === 'dashboard' && dynamicStyles.navLabelActive,
-            ]}
+      {/* ------------------ MAIN CONTENT AREA ------------------ */}
+      {isViewingProfile ? (
+        <UserProfileView
+          currentUser={currentUser}
+          isDark={isDark}
+          onBack={() => setIsViewingProfile(false)}
+        />
+      ) : (
+        <>
+          <ScrollView
+            contentContainerStyle={styles.scrollBody}
+            showsVerticalScrollIndicator={false}
+            onScrollBeginDrag={() => setIsProfileMenuOpen(false)}
           >
-            Dashboard
-          </Text>
-        </TouchableOpacity>
+            {activeTab === 'dashboard' && (
+              <>
+                <View style={styles.welcomeBanner}>
+                  <Text style={dynamicStyles.greeting}>
+                    Hello, {currentUser.name.split(' ')[0]} 👋
+                  </Text>
+                  <Text style={dynamicStyles.subGreeting}>
+                    {isAdmin ? 'System Operations & Control Panel' : 'Workspace & Simulation Overview'}
+                  </Text>
+                </View>
 
-        <TouchableOpacity
-          style={styles.navTab}
-          onPress={() => setActiveTab('explore')}
-        >
-          <Compass
-            size={20}
-            color={activeTab === 'explore' ? (isDark ? '#00daf3' : '#00838f') : (isDark ? '#64748b' : '#94a3b8')}
-          />
-          <Text
-            style={[
-              dynamicStyles.navLabel,
-              activeTab === 'explore' && dynamicStyles.navLabelActive,
-            ]}
-          >
-            Explore
-          </Text>
-        </TouchableOpacity>
+                {isAdmin ? (
+                  <AdminView isDark={isDark} dynamicStyles={dynamicStyles} />
+                ) : (
+                  <StandardUserView isDark={isDark} dynamicStyles={dynamicStyles} />
+                )}
+              </>
+            )}
 
-        <TouchableOpacity
-          style={styles.navTab}
-          onPress={() => setActiveTab('notifications')}
-        >
-          <Bell
-            size={20}
-            color={activeTab === 'notifications' ? (isDark ? '#00daf3' : '#00838f') : (isDark ? '#64748b' : '#94a3b8')}
+            {activeTab === 'explore' && <ExploreView isDark={isDark} />}
+            {activeTab === 'notifications' && <NotificationsView isDark={isDark} />}
+          </ScrollView>
+
+          {/* Reusable Bottom Navigation Component */}
+          <BottomNav
+            activeTab={activeTab}
+            onTabChange={(tab) => {
+              setActiveTab(tab);
+              setIsViewingProfile(false);
+            }}
+            isDark={isDark}
           />
-          <Text
-            style={[
-              dynamicStyles.navLabel,
-              activeTab === 'notifications' && dynamicStyles.navLabelActive,
-            ]}
-          >
-            Alerts
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
+        </>
+      )}
+    </View>
   );
 }
 
-{/* ------------------ ADMIN PANEL VIEW ------------------ */}
 function AdminView({ isDark, dynamicStyles }: { isDark: boolean; dynamicStyles: any }) {
   return (
     <View style={styles.viewContainer}>
       <Text style={dynamicStyles.sectionTitle}>Admin Controls</Text>
-      
       <View style={styles.cardGrid}>
         <View style={dynamicStyles.card}>
           <Shield size={22} color={isDark ? '#00daf3' : '#00838f'} />
           <Text style={dynamicStyles.cardTitle}>System Status</Text>
           <Text style={dynamicStyles.cardValue}>Operational</Text>
         </View>
-
         <View style={dynamicStyles.card}>
           <Users size={22} color={isDark ? '#00daf3' : '#00838f'} />
           <Text style={dynamicStyles.cardTitle}>Total Users</Text>
           <Text style={dynamicStyles.cardValue}>1,248</Text>
         </View>
       </View>
-
       <View style={[dynamicStyles.card, styles.fullWidthCard]}>
         <BarChart3 size={22} color={isDark ? '#00daf3' : '#00838f'} />
         <Text style={dynamicStyles.cardTitle}>Admin Analytics</Text>
@@ -257,26 +222,22 @@ function AdminView({ isDark, dynamicStyles }: { isDark: boolean; dynamicStyles: 
   );
 }
 
-{/* ------------------ STANDARD USER VIEW ------------------ */}
 function StandardUserView({ isDark, dynamicStyles }: { isDark: boolean; dynamicStyles: any }) {
   return (
     <View style={styles.viewContainer}>
       <Text style={dynamicStyles.sectionTitle}>My Workspace</Text>
-
       <View style={styles.cardGrid}>
         <View style={dynamicStyles.card}>
           <Activity size={22} color={isDark ? '#00daf3' : '#00838f'} />
           <Text style={dynamicStyles.cardTitle}>Active Projects</Text>
           <Text style={dynamicStyles.cardValue}>4</Text>
         </View>
-
         <View style={dynamicStyles.card}>
           <FlaskConical size={22} color={isDark ? '#00daf3' : '#00838f'} />
           <Text style={dynamicStyles.cardTitle}>Completed Labs</Text>
           <Text style={dynamicStyles.cardValue}>12</Text>
         </View>
       </View>
-
       <View style={[dynamicStyles.card, styles.fullWidthCard]}>
         <Text style={dynamicStyles.cardTitle}>Recent Activity</Text>
         <Text style={dynamicStyles.cardBody}>
@@ -287,7 +248,6 @@ function StandardUserView({ isDark, dynamicStyles }: { isDark: boolean; dynamicS
   );
 }
 
-/* ------------------ STATIC LAYOUT STYLES ------------------ */
 const styles = StyleSheet.create({
   brandGroup: {
     flexDirection: 'row',
@@ -302,6 +262,7 @@ const styles = StyleSheet.create({
   scrollBody: {
     padding: 16,
     paddingBottom: 32,
+    flexGrow: 1,
   },
   welcomeBanner: {
     marginBottom: 20,
@@ -324,15 +285,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 8,
   },
-  navTab: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 4,
-  },
 });
 
-/* ------------------ DYNAMIC THEME STYLES ------------------ */
 const getStyles = (isDark: boolean) =>
   StyleSheet.create({
     container: {
@@ -476,21 +430,5 @@ const getStyles = (isDark: boolean) =>
       fontSize: 13,
       color: isDark ? '#94a3b8' : '#64748b',
       lineHeight: 18,
-    },
-    bottomNav: {
-      height: 60,
-      flexDirection: 'row',
-      borderTopWidth: 1,
-      borderTopColor: isDark ? '#1e293b' : '#e2e8f0',
-      backgroundColor: isDark ? '#0d1320' : '#f8fafc',
-    },
-    navLabel: {
-      fontSize: 11,
-      fontWeight: '500',
-      color: isDark ? '#64748b' : '#94a3b8',
-    },
-    navLabelActive: {
-      color: isDark ? '#00daf3' : '#00838f',
-      fontWeight: '700',
     },
   });
